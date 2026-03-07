@@ -27,10 +27,6 @@ public class Dice : MonoBehaviour
     public float throwForce = 10f;
     public float rollTorque = 50f;
 
-    [Header("Pengaturan Visual Lock")]
-    [SerializeField] private float lockHeightOffset = 0.5f;
-    [SerializeField] private float lockMultiplier = 1.2f;
-
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -69,21 +65,7 @@ public class Dice : MonoBehaviour
     {
         if (isRolling) return;
 
-        isLocked = !isLocked;
-
-        if (isLocked)
-        {
-            Debug.Log($"<color=yellow>{gameObject.name} di-LOCK!</color>");
-
-            DiceUIManager uIManager = FindFirstObjectByType<DiceUIManager>();
-
-            if (uIManager != null)
-            {
-                uIManager.AddLockedDiceUI((int)CurrentFace);
-            }
-        }
-
-        Destroy (gameObject);
+        DiceManager.Instance.LockDice(this);
     }
 
     private void DetermineTopFace()
