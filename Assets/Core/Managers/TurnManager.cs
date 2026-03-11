@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class TurnManager : MonoBehaviour
@@ -57,6 +58,16 @@ public class TurnManager : MonoBehaviour
 
     private void StartNewGameLoop()
     {
+        StartCoroutine(OpeningSceneRoutine());
+    }
+
+    private IEnumerator OpeningSceneRoutine()
+    {
+        Debug.Log("<color=yellow>TurnManager: Memulai Opening Scene...</color>");
+
+        yield return new WaitForSeconds(3f);
+
+        Debug.Log("<color=yellow>TurnManager: Opening Scene selesai, memulai battle!</color>");
         CurrentPlayerIndex = 0;
         OnPlayerTurnChanged?.Invoke(CurrentPlayerIndex);
         ChangePhase(TurnPhase.TurnStart);
@@ -118,7 +129,7 @@ public class TurnManager : MonoBehaviour
         Debug.Log($"Fase Reroll ({currentRerollCount}/{MAX_REROLLS}): Menunggu pemain nge-lock dadu...");
     }
 
-    private void ProcessedToResolution()
+    public void ProcessedToResolution()
     {
         ChangePhase(TurnPhase.Resolution);
     }
@@ -126,19 +137,48 @@ public class TurnManager : MonoBehaviour
     private void HandleResolution()
     {
         Debug.Log("Fase Resolution: Menghitung icon dadu...");
+
+        DiceManager.Instance.EndTurnAndResolve();
+
+        StartCoroutine(ResolutionDelayRoutine());        
+    }
+
+    private IEnumerator ResolutionDelayRoutine()
+    {
+        yield return new WaitForSeconds(2f);
+
+        ChangePhase(TurnPhase.TugOfWarUpdate);
     }
 
     private void HandleTugOfWarUpdate()
     {
         Debug.Log("Fase Tug Of War: ");
+
+        StartCoroutine(TugOfWarDelayRoutine());
+    }
+
+    private IEnumerator TugOfWarDelayRoutine()
+    {
+        yield return new WaitForSeconds(1.5f);
+        ChangePhase(TurnPhase.TurnEnd);
     }
 
     private void HandleTurnEnd()
     {
         Debug.Log("Giliran Selesai. Mengecek Pemenang...");
 
+        DiceManager.Instance.CleanUpDiceForNextTurn();
+
         CurrentPlayerIndex = (CurrentPlayerIndex == 0) ? 1 : 0;
         OnPlayerTurnChanged?.Invoke(CurrentPlayerIndex);
+
+        StartCoroutine(EndTurnDelayRoutine());
+
+    }
+
+    private IEnumerator EndTurnDelayRoutine()
+    {
+        yield return new WaitForSeconds(2f);
 
         ChangePhase(TurnPhase.TurnStart);
     }
@@ -149,6 +189,10 @@ public class TurnManager : MonoBehaviour
         {
             Debug.Log("TurnManager: Mendapat laporan semua dadu sudah berhenti. Melanjutkan ke fase ReRoll!");
             ChangePhase(TurnPhase.RerollPhase);
+        }
+        else if (CurrentPhase == TurnPhase.RerollPhase)
+        {
+            Debug.Log("TurnManager: Re-Roll Selesai! Silakan Lock dadu lagi atau lanjut ke fase Resolve!");
         }
     }
 }

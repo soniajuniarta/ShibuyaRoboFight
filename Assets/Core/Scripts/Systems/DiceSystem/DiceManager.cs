@@ -28,7 +28,7 @@ public class DiceManager : MonoBehaviour
 
     private void Awake()
     {
-        TurnManager.OnPhaseChanged += HandleChanged; 
+        TurnManager.OnPhaseChanged += HandleChanged;
 
         if (Instance == null) Instance = this;
         else Destroy (gameObject);
@@ -51,12 +51,7 @@ public class DiceManager : MonoBehaviour
         {
             currentRollCount = 1;
 
-            if (activeDice.Count == 0 && lockedDice.Count == 0)
-            {
-                SpawnDice();
-            }
-
-            RollAllDice();
+            Debug.Log("DiceManager: Dadu disiapkan. Menunggu lemparan pertama...");
         }
     }
 
@@ -107,9 +102,15 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    private void RollAllDice()
+    public void RollAllDice()
     {
         Debug.Log("DiceManager: Melempar SEMUA dadu!...");
+
+
+        if (activeDice.Count == 0 && lockedDice.Count == 0)
+        {
+            SpawnDice();
+        }
 
         foreach(Dice dice in activeDice)
         {
@@ -284,5 +285,22 @@ public class DiceManager : MonoBehaviour
     public void ClearActiveDice()
     {
         activeDice.Clear();
+    }
+
+    public void CleanUpDiceForNextTurn()
+    {
+        Debug.Log("DiceManager: Membersihkan tray untuk gilliran berikutnya...");
+
+        foreach (Dice dice in activeDice) { if (dice != null) Destroy(dice.gameObject); }
+        foreach (Dice dice in lockedDice) { if (dice != null) Destroy(dice.gameObject); }
+
+        activeDice.Clear();
+        lockedDice.Clear();
+        currentRollCount = 0;
+
+        if (DiceUIManager.Instance != null)
+        {
+            DiceUIManager.Instance.ClearLockedDice();
+        }
     }
 }
