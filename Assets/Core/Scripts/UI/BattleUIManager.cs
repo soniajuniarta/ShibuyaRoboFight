@@ -8,9 +8,14 @@ public class BattleUIManager : MonoBehaviour
     [Tooltip("Tarik Panel Main Battle dari Hierarchy ke sini!")]
     public GameObject panelMainBattle;
 
-
     [Tooltip("Tarik Panel Dice Screen dari Hierarchy ke sini!")]
     public GameObject panelDiceScreen;
+
+    [Tooltip("Tarik btnTapToRoll dari Hierarchy ke sini!")]
+    public GameObject btnTapToRoll;
+
+    [Tooltip("Masukin object 'Action Buttons' dari Hierarchy ke sini!")]
+    public GameObject actionButtons;
 
     [Header("Cinemachine Cameras")]
     public GameObject VCamArena;
@@ -34,16 +39,19 @@ public class BattleUIManager : MonoBehaviour
 
     private void HandlePhaseChange(TurnManager.TurnPhase phase)
     {
+        bool isPlayerTurn = (TurnManager.Instance.CurrentPlayerIndex == 0);
+
         switch(phase)
         {
             case TurnManager.TurnPhase.FirstRoll:
-            bool isPlayerTurn = (TurnManager.Instance.CurrentPlayerIndex == 0);
                 ShowDiceScreen(isPlayerTurn);
                 break;
 
             case TurnManager.TurnPhase.RerollPhase:
                 if (panelDiceScreen != null) panelDiceScreen.SetActive(true);
                 Debug.Log("<color=cyan>UIManager: Reroll Phase - Tampilkan UI Reroll!</color>");
+
+                if (actionButtons != null) actionButtons.SetActive(isPlayerTurn);
                 break;
 
             default:
@@ -68,6 +76,8 @@ public class BattleUIManager : MonoBehaviour
     {
         if (panelMainBattle != null) panelMainBattle.SetActive(false);
         if (panelDiceScreen != null) panelDiceScreen.SetActive(false);
+        if (btnTapToRoll != null) btnTapToRoll.SetActive(isPlayerTurn);
+        if (actionButtons != null) actionButtons.SetActive(isPlayerTurn);
 
         if (VCamArena != null) VCamArena.SetActive(false);
 

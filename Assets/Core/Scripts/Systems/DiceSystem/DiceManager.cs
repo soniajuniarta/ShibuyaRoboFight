@@ -12,8 +12,8 @@ public class DiceManager : MonoBehaviour
     public Transform spawnPoint;
     public int numberOfDice = 6;
 
-    private List<Dice> activeDice = new List<Dice>();
-    private List<Dice> lockedDice = new List<Dice>();
+    public List<Dice> activeDice = new List<Dice>();
+    public List<Dice> lockedDice = new List<Dice>();
 
     [Header("Robot Reference")]
     public RobotStats playerStats;
@@ -163,6 +163,22 @@ public class DiceManager : MonoBehaviour
 
         Debug.Log($"<color=magenta>--- MEMULAI RESOLVE PHASE ({finalDicePool.Count} Dadu) ---</color>");
 
+        RobotStats currentAttacker;
+        RobotStats currentDefender;
+
+        if (TurnManager.Instance.CurrentPlayerIndex == 0)
+        {
+            currentAttacker = playerStats;
+            currentDefender = enemyStats;
+            Debug.Log("DiceManager: Player menyerang Enemy dengan hasil dadu berikut:");
+        }
+        else
+        {
+            currentAttacker = enemyStats;
+            currentDefender = playerStats;
+            Debug.Log("DiceManager: Enemy menyerang Player dengan hasil dadu berikut:");
+        }
+
         Dictionary<DiceFace, int> diceCounts = new Dictionary<DiceFace, int>();
         foreach (DiceFace face in Enum.GetValues(typeof(DiceFace)))
         {
@@ -188,7 +204,7 @@ public class DiceManager : MonoBehaviour
             int count = diceCounts[DiceFace.Heal];
             Debug.Log($"[2] HEAL: Player dipulihkan sebanyak {count * 2} HP.");
 
-            if (playerStats != null) playerStats.Heal(count * 2);
+            if (currentAttacker != null) currentAttacker.Heal(count * 2);
         }
 
         if (diceCounts[DiceFace.Smash] > 0)
@@ -196,7 +212,7 @@ public class DiceManager : MonoBehaviour
             int count = diceCounts[DiceFace.Smash];
             Debug.Log($"[3] ATTACK: Menyerang musuh dengan {count} Damage!");
 
-            if (enemyStats != null) enemyStats.TakeDamage(count);
+            if (currentDefender != null) currentDefender.TakeDamage(count);
         }
 
         if (diceCounts[DiceFace.Energy] > 0)
@@ -204,7 +220,7 @@ public class DiceManager : MonoBehaviour
             int count = diceCounts[DiceFace.Energy];
             Debug.Log($"[4] ENERGY: Menambah {count} Ability Point ke Player.");
 
-            if (playerStats != null) playerStats.AddEnergy(count);
+            if (currentAttacker != null) currentAttacker.AddEnergy(count);
         }
 
         int destructCount = diceCounts[DiceFace.Destruction];
